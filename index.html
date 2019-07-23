@@ -152,28 +152,135 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-我的第一篇hexo博客文章" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-hashMap（一）" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/18/我的第一篇hexo博客文章/">我的第一篇hexo博客文章</a>
-    </h1>
-  
-
-        
-        <a href="/2019/07/18/我的第一篇hexo博客文章/" class="archive-article-date">
-  	<time datetime="2019-07-17T16:40:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-18</time>
-</a>
-        
-      </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="第一长"><a href="#第一长" class="headerlink" title="第一长"></a>第一长</h2><p>test</p>
-<h2 id="第一章"><a href="#第一章" class="headerlink" title="第一章"></a>第一章</h2><p>内容</p>
+        <h2 id="1-HashMap的特性"><a href="#1-HashMap的特性" class="headerlink" title="1.HashMap的特性"></a>1.HashMap的特性</h2><ul>
+<li>HashMap是一个散列桶，存储的是键值对</li>
+<li>HashMap采用了数组加链表的结构。通过Hash值计算Node在Node&lt;K,v&gt;[]（哈希桶数组）的下标，然后将Node 放在该数组索引下。JDK1.8后，如果该索引下的链表长度超过8，则会将链表转成红黑树。</li>
+<li>HashMap是线程不安全的</li>
+<li>HashmMap可以接受一个null键，但是HashTable不可以。</li>
+</ul>
+<p>结构模型如下：</p>
+<p><img src="https://note.youdao.com/yws/public/resource/742b0d487ba67aee5268b9c9bb47e25c/xmlnote/F43F3E7EFF4C4E599D9D0C67853E080D/4821" alt="结构"></p>
+<hr>
+<h2 id="2-HashMap的重要默认属性值"><a href="#2-HashMap的重要默认属性值" class="headerlink" title="2.HashMap的重要默认属性值"></a>2.HashMap的重要默认属性值</h2><ul>
+<li><p><em><code>DEFAULT_INITIAL_CAPACITY</code></em> ：默认的初始化容量</p>
+<p><strong>源码</strong>：<em><code>static final int DEFAULT_INITIAL_CAPACITY = 1 &lt;&lt; 4</code></em></p>
+</li>
+</ul>
+<blockquote>
+<p>map的容量 <em><code>length</code></em> 必须是2的幂数。HashMap为了存取高效，就需要减少hash碰撞，把数据分配均匀。这就涉及到了数据分配的算法。在JDK1.7中是对通过 <em><code>hash%length</code></em> 进行取模。在1.8中进行了优化，通过位移运算进行索引的获取，即 <em><code>hash&amp;(lenght-1)</code></em>。</p>
+</blockquote>
+<blockquote>
+<p>那么为了保证 <em><code>hash%length</code></em> == <em><code>hash&amp;(lenght-1)</code></em>,就必须使得length的长度是2的n次方。2的n次方在二进制里面为2的后面n个0，那么进行减一的操作后，变成了n个1。</p>
+</blockquote>
+<blockquote>
+<p>假如hash值为10，length 为8,</p>
+</blockquote>
+<pre><code>%运算时
+10%8 = 2 ; 
+
+&amp;运算时
+ 0000 1010  10
+&amp;0000 0111   7
+=0000 0010   2
+因此 可以使得%运算结果和&amp;运算结果相同，在结果相同的情况下，&amp;运算效率更加高一点，所以1.8中采用了&amp;运算。</code></pre><ul>
+<li><em><code>MAXIMUM_CAPACITY</code></em> ：最大容量</li>
+</ul>
+<p>源码：<em><code>static final int MAXIMUM_CAPACITY = 1 &lt;&lt; 30</code></em></p>
+<ul>
+<li><em>DEFAULT_LOAD_FACTOR</em> : 负载因子</li>
+</ul>
+<p>源码：<em><code>static final float DEFAULT_LOAD_FACTOR = 0.75f</code></em></p>
+<blockquote>
+<p>负载因子 <em><code>load_factor</code></em> 是确定当前length下的哈希桶能放入的最大键值对个数。所以，在给定length的情况下，一个HashMap集合能容纳的键值对数量是由load_factor决定的。load_factor取值默认是0.75，这是一个对空间和效率权衡之后的取值，一般不建议修改，使用默认值即可。</p>
+<ul>
+<li><em><code>TREEIFY_THRESHOLD</code></em> : 链表转红黑树阈值</li>
+</ul>
+</blockquote>
+<p>源码：<em><code>static final int TREEIFY_THRESHOLD = 8</code></em></p>
+<blockquote>
+<p><em><code>treeify_threshold</code></em> 值确定了链表在超过该值后转化成红黑树，以便提高效率，默认为8。在JDk1.7之前，哈希桶数组某个索引下的节点在hash碰撞之后，会按照链表的方式进行存储，那么链表有一个特点，就是增删快，查询慢，当链表的长度到达一定程度后，会影响查询效率。JDk1.8对此进行的优化，当链表长度超过8时，会自动转化成红黑树，已提高查询效率。</p>
+</blockquote>
+<ul>
+<li><em><code>MIN_TREEIFY_CAPACITY</code></em> : 红黑树转成链表阈值</li>
+</ul>
+<p>源码：<em><code>static final int UNTREEIFY_THRESHOLD = 6</code></em></p>
+<blockquote>
+<p>红黑树转为链表的阈值，当在扩容（resize（））时（此时HashMap的数据存储位置会重新计算），在重新计算存储位置后，当原有的红黑树内数量 &lt; 6时，则将 红黑树转换成链表</p>
+</blockquote>
+<ul>
+<li><em><code>MIN_TREEIFY_CAPACITY</code></em> : 最小树形化容量阈值</li>
+</ul>
+<p>源码：<em><code>static final int MIN_TREEIFY_CAPACITY = 64</code></em> </p>
+<blockquote>
+<p>当哈希表中的容量 &gt; 该值时，才允许树形化链表 （即 将链表 转换成红黑树）。否则不进行树形化，而是进行扩容操作。为了避免树形化和扩容的冲突，这个阈值为4倍的默认容量，即为64</p>
+</blockquote>
+<h2 id="3-HashMap中两个静态内部类"><a href="#3-HashMap中两个静态内部类" class="headerlink" title="3.HashMap中两个静态内部类"></a>3.HashMap中两个静态内部类</h2><ul>
+<li><em><code>Node&lt;k,v&gt;</code></em></li>
+</ul>
+<p><em><code>Node&lt;k,v&gt;</code></em> 哈希桶，用来存储键值对，hashMap本质上就是哈希桶数组<em><code>Node&lt;k,v&gt;[]</code></em> . 哈希桶的源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Map</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> hash;</span><br><span class="line">        <span class="keyword">final</span> K key;</span><br><span class="line">        V value;</span><br><span class="line">        Node&lt;K,V&gt; next;<span class="comment">//下个节点的引用</span></span><br><span class="line"></span><br><span class="line">        Node(<span class="keyword">int</span> hash, K key, V value, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">            <span class="keyword">this</span>.hash = hash;</span><br><span class="line">            <span class="keyword">this</span>.key = key;</span><br><span class="line">            <span class="keyword">this</span>.value = value;</span><br><span class="line">            <span class="keyword">this</span>.next = next;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> K <span class="title">getKey</span><span class="params">()</span>        </span>&#123; <span class="keyword">return</span> key; &#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> V <span class="title">getValue</span><span class="params">()</span>      </span>&#123; <span class="keyword">return</span> value; &#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> key + <span class="string">"="</span> + value; &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> Objects.hashCode(key) ^ Objects.hashCode(value);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> V <span class="title">setValue</span><span class="params">(V newValue)</span> </span>&#123;</span><br><span class="line">            V oldValue = value;</span><br><span class="line">            value = newValue;</span><br><span class="line">            <span class="keyword">return</span> oldValue;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (o == <span class="keyword">this</span>)</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">if</span> (o <span class="keyword">instanceof</span> Map.Entry) &#123;</span><br><span class="line">                Map.Entry&lt;?,?&gt; e = (Map.Entry&lt;?,?&gt;)o;</span><br><span class="line">                <span class="keyword">if</span> (Objects.equals(key, e.getKey()) &amp;&amp;</span><br><span class="line">                    Objects.equals(value, e.getValue()))</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><em><code>TreeNode</code></em> </li>
+</ul>
+<p>树形节点，当链表转化成红黑树时采用的红黑树节点，其部分源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">TreeNode</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">LinkedHashMap</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">       TreeNode&lt;K,V&gt; parent;  <span class="comment">// red-black tree links</span></span><br><span class="line">       TreeNode&lt;K,V&gt; left;</span><br><span class="line">       TreeNode&lt;K,V&gt; right;</span><br><span class="line">       TreeNode&lt;K,V&gt; prev;    <span class="comment">// needed to unlink next upon deletion</span></span><br><span class="line">       <span class="keyword">boolean</span> red;</span><br><span class="line">       TreeNode(<span class="keyword">int</span> hash, K key, V val, Node&lt;K,V&gt; next) &#123;</span><br><span class="line">           <span class="keyword">super</span>(hash, key, val, next);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="comment">/**</span></span><br><span class="line"><span class="comment">        * Returns root of tree containing this node.</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">       <span class="function"><span class="keyword">final</span> TreeNode&lt;K,V&gt; <span class="title">root</span><span class="params">()</span> </span>&#123;</span><br><span class="line">           <span class="keyword">for</span> (TreeNode&lt;K,V&gt; r = <span class="keyword">this</span>, p;;) &#123;</span><br><span class="line">               <span class="keyword">if</span> ((p = r.parent) == <span class="keyword">null</span>)</span><br><span class="line">                   <span class="keyword">return</span> r;</span><br><span class="line">               r = p;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="comment">//代码省略 </span></span><br><span class="line">       <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-HashMap重要的成员变量"><a href="#4-HashMap重要的成员变量" class="headerlink" title="4.HashMap重要的成员变量"></a>4.HashMap重要的成员变量</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HashMap的实质:哈希桶数组</span></span><br><span class="line"><span class="keyword">transient</span> Node&lt;K,V&gt;[] table;</span><br><span class="line"><span class="comment">// Enrty键值对遍历</span></span><br><span class="line"><span class="keyword">transient</span> Set&lt;Map.Entry&lt;K,V&gt;&gt; entrySet;</span><br><span class="line"><span class="comment">//HashMap的存放的键值对个数</span></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> size;</span><br><span class="line"><span class="comment">//threshold= 默认容量*负载因子</span></span><br><span class="line"><span class="keyword">int</span> threshold;</span><br><span class="line"><span class="comment">// 负载因子</span></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">float</span> loadFactor;</span><br><span class="line"><span class="comment">//记录hashMap内部结构发生变化的次数</span></span><br><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> modCount;</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-HashMap的构造方法"><a href="#5-HashMap的构造方法" class="headerlink" title="5.HashMap的构造方法"></a>5.HashMap的构造方法</h2><ul>
+<li>无参构造<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.loadFactor = DEFAULT_LOAD_FACTOR; <span class="comment">// all other fields defaulted</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<blockquote>
+<p>无参构造使用的默认的负载因子（0.75）和容量（16）</p>
+</blockquote>
+<ul>
+<li>三个有参构造方法</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">//给定初始化容量和负载因子</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity, <span class="keyword">float</span> loadFactor)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (initialCapacity &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Illegal initial capacity: "</span> +</span><br><span class="line">                                           initialCapacity);</span><br><span class="line">    <span class="keyword">if</span> (initialCapacity &gt; MAXIMUM_CAPACITY)</span><br><span class="line">        initialCapacity = MAXIMUM_CAPACITY;</span><br><span class="line">    <span class="keyword">if</span> (loadFactor &lt;= <span class="number">0</span> || Float.isNaN(loadFactor))</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Illegal load factor: "</span> +</span><br><span class="line">                                           loadFactor);</span><br><span class="line">    <span class="keyword">this</span>.loadFactor = loadFactor;</span><br><span class="line">    <span class="keyword">this</span>.threshold = tableSizeFor(initialCapacity);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//给定初始化容量</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">(<span class="keyword">int</span> initialCapacity)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(initialCapacity, DEFAULT_LOAD_FACTOR);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//根据map</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="title">HashMap</span><span class="params">(Map&lt;? extends K, ? extends V&gt; m)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.loadFactor = DEFAULT_LOAD_FACTOR;</span><br><span class="line">    putMapEntries(m, <span class="keyword">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-哈希桶数组索引计算方式"><a href="#6-哈希桶数组索引计算方式" class="headerlink" title="6 哈希桶数组索引计算方式"></a>6 哈希桶数组索引计算方式</h2><p>HashMap使用哈希表和存储数据。哈希表为了解决哈希冲突，可以采用开放地址法和链地址法来解决问题。Java中HashMap采用了链地址法，就是数组加上链表的结合，数组的每一个元素都是一个链表结构，当数据经过hash计算得到数组下标后，将数据放在对用下标元素的链表上。</p>
+<p><em><code>HashMap</code></em> 使用 <em><code>put()</code></em> 方法添加键值对，在添加之前，需要根据Key值计算出hash值，根据hash值计算出数组下标。map.put(key,value)的过程如下:</p>
+<ul>
+<li>计算hash值</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>首先获取key值对应的hashCode = key.hashCode()</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">如： 1111 1111 1111 1111 1111 1111 1111 1010</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>然后将h右移1位 h&gt;&gt;16</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">即： 0000 0000 0000 0000 1111 1111 1111 1111</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>将 hashCode 与 h&gt;&gt;16 进行亦或运算，得到hash值</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">   hashCode: 1111 1111 1111 1111 1111 1111 1111 1010</span><br><span class="line">     ^</span><br><span class="line">   h&gt;&gt;16   : 0000 0000 0000 0000 1111 1111 1111 1111</span><br><span class="line"></span><br><span class="line">得到hash 值： 1111 1111 1111 1111 0000 0000 0000 0101</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>将hash值与（length-1）进行&amp;运算，得到数组下标</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  hash:   0000 0000 0000 0000 1111 1111 1111 1010</span><br><span class="line">   &amp;</span><br><span class="line">  n-1:    0000 0000 0000 0000 0000 0000 0000 1111</span><br><span class="line"></span><br><span class="line">数组下标： 0000 0000 0000 0000 0000 0000 0000 1010</span><br></pre></td></tr></table></figure>
+
+<p>从而得到数组下标 1010,即 <em><code>10</code></em><br>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">1</span>)</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">hash</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> h;</span><br><span class="line">    <span class="keyword">return</span> (key == <span class="keyword">null</span>) ? <span class="number">0</span> : (h = key.hashCode()) ^ (h &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">&#125;</span><br><span class="line">(<span class="number">2</span>)</span><br><span class="line"><span class="comment">// 求索引方法，在putval中使用</span></span><br><span class="line">i = (n - <span class="number">1</span>) &amp; hash]</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
 
       
 
@@ -186,82 +293,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2019/07/18/我的第一篇hexo博客文章/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-hello-world" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/17/hello-world/">Hello World</a>
-    </h1>
-  
-
-        
-        <a href="/2019/07/17/hello-world/" class="archive-article-date">
-  	<time datetime="2019-07-17T15:53:19.958Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-17</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/07/17/hello-world/">展开全文 >></a>
+          <a class="article-more-a" href="/2019/07/23/hashMap（一）/">展开全文 >></a>
         </p>
       
 
